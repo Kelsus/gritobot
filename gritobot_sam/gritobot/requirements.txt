@@ -1,0 +1,3 @@
+boto3
+slack_sdk
+openai

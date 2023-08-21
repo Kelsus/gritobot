@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  gritobot_sam
+
+  SAM Template for gritobot_sam
+
+Globals:
+  Function:
+    Timeout: 3
+
+Parameters:
+  SlackToken:
+    Type: String
+    Description: Slack token for the function
+
+Resources:
+  GritoBotFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: gritobot/
+      Handler: gritobot.lambda_handler
+      Runtime: python3.10
+      Architectures:
+      - x86_64
+      Policies:
+        - AWSLambdaExecute
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            Action:
+              - lambda:InvokeFunction
+            Effect: Allow
+            Resource: !GetAtt ProcessAndReplyFunction.Arn
+  ProcessAndReplyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: process_and_reply.process_and_reply
+      Runtime: python3.10
+      CodeUri: gritobot/
+      Environment:
+        Variables:
+          SLACK_TOKEN: !Ref SlackToken
+      Policies:
+        - AWSLambdaExecute
+        - AWSLambdaBasicExecutionRole
+        # Add any additional permissions here if needed
+
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Ref: ApplicationResourceGroup
+      AutoConfigurationEnabled: 'true'
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  GritobotdApi:
+    Description: API Gateway endpoint URL for Prod stage for gritobot function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/gritobot/"
+  GritobotFunction:
+    Description: Gritobot Lambda Function ARN
+    Value: !GetAtt GritobotFunction.Arn
+  GritobotFunctionIamRole:
+    Description: Implicit IAM Role created for Gritobot function
+    Value: !GetAtt GritobotFunctionRole.Arn
