@@ -13,9 +13,14 @@ Parameters:
   SlackToken:
     Type: String
     Description: Slack token for the function
+    Default: fakevalue
+  OpenAIAPIKey:
+    Type: String
+    Description: OpenAPI Key for alling the api
+    Default: willnotwork
 
 Resources:
-  GritoBotFunction:
+  GritobotFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: gritobot/
@@ -23,6 +28,9 @@ Resources:
       Runtime: python3.10
       Architectures:
       - x86_64
+      Environment:
+        Variables:
+          PROCESS_AND_REPLY_FUNCTION: !Ref ProcessAndReplyFunction  # <-- Added this line
       Policies:
         - AWSLambdaExecute
         - AWSLambdaBasicExecutionRole
@@ -31,15 +39,23 @@ Resources:
               - lambda:InvokeFunction
             Effect: Allow
             Resource: !GetAtt ProcessAndReplyFunction.Arn
+      Events:
+        SlackEvent:
+          Type: Api
+          Properties:
+            Path: /slack-events
+            Method: POST
   ProcessAndReplyFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: process_and_reply.process_and_reply
       Runtime: python3.10
       CodeUri: gritobot/
+      Timeout: 30
       Environment:
-        Variables:
+        Variables: 
           SLACK_TOKEN: !Ref SlackToken
+          OPENAI_API_KEY: !Ref OpenAIAPIKey
       Policies:
         - AWSLambdaExecute
         - AWSLambdaBasicExecutionRole
@@ -62,7 +78,7 @@ Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  GritobotdApi:
+  GritobotApi:
     Description: API Gateway endpoint URL for Prod stage for gritobot function
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/gritobot/"
   GritobotFunction:

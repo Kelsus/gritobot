@@ -7,6 +7,6 @@ architecture = "x86_64"
 handler = "gritobot.lambda_handler"
 manifest_hash = "bf64c14e5993bc7bf4ba20944d642d44"
 packagetype = "Zip"
-functions = ["GritoBotFunction", "ProcessAndReplyFunction"]
+functions = ["GritobotFunction", "ProcessAndReplyFunction"]
 
 [layer_build_definitions]

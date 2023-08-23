@@ -1,31 +1,39 @@
 import json
 import boto3
+import os
 
 # AWS Lambda Client
 lambda_client = boto3.client('lambda')
 
+PROCESS_AND_REPLY_FUNCTION = os.environ["PROCESS_AND_REPLY_FUNCTION"]
+
+
 def lambda_handler(event, context):
     # Parse the incoming request
-    print(event['event'])
+    print("Incoming event:")
+    print(event)
+
+    # Check if body exists and is a string, then parse it
+    body = json.loads(event["body"]) if "body" in event and isinstance(event["body"], str) else {}
 
     # URL Verification Challenge
-    if "challenge" in event['event']:
+    if "challenge" in body:
         return {
             'statusCode': 200,
-            'body': event["event"]["challenge"],
+            'body': body["challenge"],
             'headers': {
                 'Content-Type': 'text/plain',
             }
         }
     # Process incoming Slack events
     else:
-        if event['event']['type'] == 'app_mention':
+        if body.get('event', {}).get('type') == 'app_mention':
             # Acknowledge receipt of the event
             # Then invoke the second Lambda function asynchronously
             lambda_client.invoke(
-                FunctionName='ProcessGritoBot',
+                FunctionName=PROCESS_AND_REPLY_FUNCTION,
                 InvocationType='Event',
-                Payload=json.dumps(event)
+                Payload=json.dumps(body)  # Also, ensure you pass the payload as a string
             )
             return {
                 'statusCode': 200,
@@ -39,6 +47,6 @@ def lambda_handler(event, context):
                 'statusCode': 200,
                 'body': "No 'app_mention' event in the request.",
                 'headers': {
-                    'Content-Type': 'text/plain',
+                'Content-Type': 'text/plain',
                 }
             }
