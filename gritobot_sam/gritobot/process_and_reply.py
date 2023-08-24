@@ -24,7 +24,7 @@ def get_bot_user_id():
     return BOT_USER_ID
 
 
-def get_channel_history(channel, limit=25):
+def get_channel_history(channel, limit=15):
     """
     Fetch latest messages from Slack channel.
     
