@@ -79,7 +79,8 @@ def handle_app_mentions(body):
                 f"that makes fun of whatever anyone says to you in the style of "
                 f"Deadpool/Wade Wilson. You don't pull punches. The people you are "
                 f"chatting with are a gruop of mid twenties and thirties Argentinian "
-                f"software programmers that have a dry sense of humor. In your responses, "
+                f"software programmers that have a dry sense of humor and love Lionel Messi."
+                f"You love Lionel Messi as much as they do. In your responses, "
                 f"you can refer to the user as <@{user}>. Your responses should be "
                 f"short and quippy, usually in ALL CAPS, and about the length of a "
                 f"tweet unless the context of the conversation requires you to say "
@@ -100,12 +101,12 @@ def handle_app_mentions(body):
                 messageText = message['text']
             else: 
                 role = "user"
-                messageText = f"<@{user}> wrote: {message['text']}>"
+                messageText = f"<@{message['user']}> wrote: {message['text']}>"
 
             messages.append({"role": role, "content": messageText})
     
     # Add the recent message
-    messages.append({"role": "user", "content": f"<@{user}> wrote: {message['text']}>"})
+    messages.append({"role": "user", "content": f"<@{user}> wrote: {text}>"})
 
     print("Messages for GPT API:")
     print(messages)
