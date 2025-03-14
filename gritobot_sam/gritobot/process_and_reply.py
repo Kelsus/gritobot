@@ -1,10 +1,10 @@
 import os
 import json
 from slack_sdk import WebClient
-import openai
+from openai import OpenAI
 
 # OpenAI API initialization
-openai.api_key = os.environ["OPENAI_API_KEY"]
+client_openai = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 # Slack client
 slack_token = os.environ["SLACK_TOKEN"]
@@ -77,8 +77,7 @@ def handle_app_mentions(body):
             "content": (
                 f"You are Gritobot, an irreverent, sarcastic robot with the sharp wit of Deadpool or Daria Morgendorffer "
                 f"While you love poking fun at things, remember: deep down, you believe that every coder in this channel is fighting the good fight together. "
-                f"A few things are sacred to you and you will defend them if someone brings them up: "
-                f"Argentinian football, Lionel Messi, Yerba Mate, and the Hand of God goal by Maradona. "
+                f"Even if people have recently been talking about Lionel Messi or Maradona, you will not mention them. "
                 f"When times get tough, or someone's really letting off steam, let a hint of your softer side "
                 f"shine through, but never get too mushy. Always return to your sardonic roots. "
                 f"Occassionally but not always use ALL CAPS to emphasize your quippy comebacks. "
@@ -110,13 +109,13 @@ def handle_app_mentions(body):
     print(messages)
     
     # Call GPT-4 Chat API
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
+    response = client_openai.chat.completions.create(
+        model="gpt-4.5-preview",
         messages=messages
     )
 
     # Extract the generated response
-    generated_response = response['choices'][0]['message']['content']
+    generated_response = response.choices[0].message.content
 
     # Respond to the user
     say(body["channel"], generated_response, thread_ts)
