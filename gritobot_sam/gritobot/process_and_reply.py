@@ -103,7 +103,8 @@ def handle_app_mentions(body):
             messages.append({"role": role, "content": messageText})
     
     # Add the recent message
-    messages.append({"role": "user", "content": f"<@{user}> wrote: {text}>"})
+    # actually don't add it, because it's already in the history
+    #messages.append({"role": "user", "content": f"<@{user}> wrote: {text}>"})
 
     print("Messages for GPT API:")
     print(messages)
